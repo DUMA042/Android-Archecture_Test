@@ -19,9 +19,12 @@ package com.example.android.todolist;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
                      int position=viewHolder.getAdapterPosition();
                      List<TaskEntry> tasks=mAdapter.getTasks();
                      mDb.taskDao().DeleteTask(tasks.get(position));
-                        retrieveTasks();
+
                     }
                 });
             }
@@ -107,29 +110,31 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
             }
         });
         mDb=AppDatabase.getInstance(getApplicationContext());
+        retrieveTasks();
     }
     @Override
     protected  void onResume() {
         super.onResume();
-        retrieveTasks();
+
 
     }
 
     private void retrieveTasks() {
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-              final List<TaskEntry> tasks =mDb.taskDao().loadAllEntity();
-              //This will be modified
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.setTasks(tasks);
-                    }
-                });
+        final String LOG_TAG=MainActivity.class.getSimpleName();
 
+              final LiveData<List<TaskEntry>> tasks =mDb.taskDao().loadAllEntity();
+              //This will be modified
+        tasks.observe(this, new Observer<List<TaskEntry>>() {
+            @Override
+            public void onChanged(List<TaskEntry> taskEntries) {
+                mAdapter.setTasks(taskEntries);
+                Log.d(LOG_TAG,"Creating New Data UI");
             }
         });
+
+
+
+
     }
 
     @Override
