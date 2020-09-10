@@ -20,6 +20,6 @@ public interface TaskDao {
 @Delete
     void DeleteTask(TaskEntry taskEntry);
     @Query("SELECT * FROM task Where id=:id")
-TaskEntry loadTaskById(int id);
+LiveData<TaskEntry> loadTaskById(int id);
 
 }

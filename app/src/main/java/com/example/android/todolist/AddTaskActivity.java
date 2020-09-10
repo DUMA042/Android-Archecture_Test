@@ -19,12 +19,15 @@ package com.example.android.todolist;
 import android.content.Intent;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.android.todolist.database.AppDatabase;
 import com.example.android.todolist.database.TaskEntry;
@@ -71,19 +74,23 @@ public class AddTaskActivity extends AppCompatActivity {
             if (mTaskId == DEFAULT_TASK_ID) {
                 // populate the UI
                 mTaskId=intent.getIntExtra(EXTRA_TASK_ID,DEFAULT_TASK_ID);
-                AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                      final  TaskEntry task=mDb.taskDao().loadTaskById(mTaskId); //This is where it check and get the Task object with the write id.
-                       runOnUiThread(new Runnable() {
-                           @Override
-                           public void run() {
-                               populateUI(task);
-                           }
-                       });
 
-                    }
-                });
+
+
+                      final LiveData<TaskEntry> task=mDb.taskDao().loadTaskById(mTaskId); //This is where it check and get the Task object with the write id.
+                        task.observe(this, new Observer<TaskEntry>() {
+                            @Override
+                            public void onChanged(TaskEntry taskEntry) {
+                                String LOG_TAG="VV";
+                                Log.d(LOG_TAG,"Receiving New Update");
+                                task.removeObserver(this); //This is added because we do not need to Set a Listener for the Data again
+                                populateUI(taskEntry);
+                            }
+                        });
+
+
+
+
             }
         }
     }
