@@ -25,6 +25,8 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.ItemC
 
     private void retrieveTasks() {
         final String LOG_TAG=MainActivity.class.getSimpleName();
-
+         MainViewModel viewModel;
               final LiveData<List<TaskEntry>> tasks =mDb.taskDao().loadAllEntity();
               //This will be modified
         tasks.observe(this, new Observer<List<TaskEntry>>() {
